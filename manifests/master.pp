@@ -143,9 +143,10 @@ class puppet::master (
     }
 
     file { "/etc/puppet/rack/config.ru":
-      ensure => present,
-      source => "puppet:///modules/puppet/config.ru",
-      mode   => '0644',
+      ensure  => link,
+      target  => '/usr/share/puppet/ext/rack/files/config.ru',
+      mode    => '0644',
+      require => [ Package[$puppet_master_package], File['/etc/puppet/rack'] ]
     }
 
     concat::fragment { 'puppet.conf-master':
