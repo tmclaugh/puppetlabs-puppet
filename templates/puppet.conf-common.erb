@@ -12,16 +12,16 @@
     postrun_command           = /etc/puppet/etckeeper-commit-post
 <% end -%>
 <% if @puppet_extra_configs.has_key?('main') -%>
-<% @puppet_extra_configs['main'].each do |key,value| -%>
+<% @puppet_extra_configs['main'].sort.each do |key,value| -%>
     <%= key %><%= ' ' * (26-key.length) %>= <%= value %>
 <% end -%>
 <% end -%>
-    
+
 [agent]
     report                    = true
     environment               = production
-<% if @puppet_extra_configs.has_key?('agent') -%> 
-<% @puppet_extra_configs['agent'].each do |key,value| -%>
+<% if @puppet_extra_configs.has_key?('agent') -%>
+<% @puppet_extra_configs['agent'].sort.each do |key,value| -%>
     <%= key %><%= ' ' * (26-key.length) %>= <%= value %>
 <% end -%>
 <% end -%>
