@@ -27,4 +27,14 @@ Listen <%= puppet_passenger_port %>
                 Order allow,deny
                 allow from all
         </Directory>
+<% if @puppet_central_ca -%>
+        ProxyPassMatch ^(/.*?)/(certificate.*?)/(.*)$ balancer://puppet_ca/
+        ProxyPassReverse ^(/.*?)/(certificate.*?)/(.*)$ balancer://puppet_ca/
+<% end -%>
 </VirtualHost>
+<% if @puppet_central_ca -%>
+
+<Proxy balancer://puppet_ca>
+        BalancerMember <%= @puppet_central_ca %>
+</Proxy>
+<% end -%>

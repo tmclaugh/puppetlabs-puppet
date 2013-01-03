@@ -80,6 +80,7 @@ class puppet::master (
   $puppet_master_package      = $::puppet::params::puppet_master_package,
   $package_provider           = undef,
   $puppet_master_service      = $::puppet::params::puppet_master_service,
+  $puppet_central_ca          = undef,
   $puppet_extra_configs       = {},
   $version                    = 'present'
 
