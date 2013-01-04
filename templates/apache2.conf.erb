@@ -29,6 +29,7 @@ Listen <%= puppet_passenger_port %>
         </Directory>
 <% if @puppet_central_ca -%>
 
+        SSLProxyEngine On
         ProxyPassMatch ^/([^/]+/certificate.*)$ <%= @puppet_central_ca %>/$1
 <% end -%>
 </VirtualHost>
