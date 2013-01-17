@@ -18,7 +18,8 @@
 #                                 devel packages should be installed.
 #   [*certname*]              - The certname configuration value in puppet.conf
 #   [*autosign*]              - The autosign configuration value in puppet.conf
-#   [*dashboard_port*]          - The port on which puppet-dashboard should run
+#   [*reports*]               - [array] of reports to generate
+#   [*reporturl*]             - The URL used by the http reports processor to send reports
 #   [*puppet_passenger*]      - Boolean value to determine whether puppet is
 #                               to be run with Passenger
 #   [*puppet_site*]           - The VirtualHost value used in the apache vhost
@@ -71,7 +72,8 @@ class puppet::master (
   $install_mysql_pkgs         = $::puppet::params::puppet_storeconfigs_packages,
   $certname                   = $::fqdn,
   $autosign                   = false,
-  $dashboard_port             = 3000,
+  $reports                    = ['log'],
+  $reporturl                  = undef,
   $puppet_passenger           = false,
   $puppet_site                = $::puppet::params::puppet_site,
   $puppet_docroot             = $::puppet::params::puppet_docroot,
