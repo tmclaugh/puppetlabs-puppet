@@ -18,6 +18,13 @@ Listen <%= puppet_passenger_port %>
         SSLVerifyClient optional
         SSLVerifyDepth  1
         SSLOptions +StdEnvVars
+        
+         
+        RequestHeader unset X-Forwarded-For
+
+        RequestHeader set X-SSL-Subject %{SSL_CLIENT_S_DN}e
+        RequestHeader set X-Client-DN %{SSL_CLIENT_S_DN}e
+        RequestHeader set X-Client-Verify %{SSL_CLIENT_VERIFY}e
 
         DocumentRoot <%= puppet_docroot %>
         RackBaseURI /
