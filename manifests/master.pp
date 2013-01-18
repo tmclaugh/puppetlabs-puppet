@@ -83,6 +83,7 @@ class puppet::master (
   $package_provider           = undef,
   $puppet_master_service      = $::puppet::params::puppet_master_service,
   $puppet_central_ca          = undef,
+  $proxy_allow_from           = [],
   $puppet_extra_configs       = {},
   $version                    = 'present'
 
