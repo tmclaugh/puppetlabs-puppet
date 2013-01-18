@@ -40,7 +40,7 @@ Listen <%= puppet_passenger_port %>
         <Proxy *>
           Order allow,deny
           <% @proxy_allow_from.each do |host| -%>
-          <%= host %>
+          Allow from <%= host %>
           <% end -%>
           Deny from all
         </Proxy>
