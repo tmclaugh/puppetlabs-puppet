@@ -5,7 +5,6 @@ define puppet::fileserver::section ($path, $allow, $deny = undef) {
     target  => '/etc/puppet/fileserver.conf',
     order   => 05,
     content => template('puppet/fileserver-section.conf.erb'),
-    notify  => Service[$::puppet::master::service_notify]
   }
 
 }
