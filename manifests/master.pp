@@ -78,6 +78,7 @@ class puppet::master (
   $puppet_site                = $::puppet::params::puppet_site,
   $puppet_docroot             = $::puppet::params::puppet_docroot,
   $puppet_vardir              = $::puppet::params::puppet_vardir,
+  $manage_vardir              = true,
   $puppet_passenger_port      = false,
   $puppet_master_package      = $::puppet::params::puppet_master_package,
   $package_provider           = undef,
@@ -212,11 +213,13 @@ class puppet::master (
     }
   }
 
-  file { $puppet_vardir:
-    ensure       => directory,
-    recurse      => true,
-    recurselimit => '1',
-    notify       => $service_notify,
+  if $manage_vardir {
+    file { $puppet_vardir:
+      ensure       => directory,
+      recurse      => true,
+      recurselimit => '1',
+      notify       => $service_notify,
+    }
   }
 
   if defined(File['/etc/puppet']) {
