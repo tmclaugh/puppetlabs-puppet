@@ -6,7 +6,6 @@ class puppet::fileserver {
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
-    notify => Service[$::puppet::master::service_notify];
   }
 
   ::concat::fragment { 'puppet_fileserver_conf_header':
