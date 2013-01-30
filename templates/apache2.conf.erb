@@ -1,5 +1,7 @@
 LoadModule ssl_module modules/mod_ssl.so
-
+<% if @puppet_central_ca -%>
+LoadModule proxy_http_module modules/mod_proxy_http.so
+<% end -%>
 Listen <%= puppet_passenger_port %>
 
 <VirtualHost *:<%= puppet_passenger_port %>>
@@ -16,8 +18,8 @@ Listen <%= puppet_passenger_port %>
   SSLVerifyClient         optional
   SSLVerifyDepth          1
   SSLOptions              +StdEnvVars
-  
-   
+
+
   RequestHeader unset X-Forwarded-For
 
   RequestHeader set X-SSL-Subject %{SSL_CLIENT_S_DN}e
@@ -40,7 +42,6 @@ Listen <%= puppet_passenger_port %>
 <% @proxy_allow_from.each do |host| -%>
     Allow from <%= host %>
 <% end -%>
-    Deny from all
   </Proxy>
 
   ProxyVia On
