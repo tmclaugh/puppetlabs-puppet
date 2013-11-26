@@ -18,7 +18,8 @@
 #                                 devel packages should be installed.
 #   [*certname*]              - The certname configuration value in puppet.conf
 #   [*autosign*]              - The autosign configuration value in puppet.conf
-#   [*dashboard_port*]          - The port on which puppet-dashboard should run
+#   [*reports*]               - [array] of reports to generate
+#   [*reporturl*]             - The URL used by the http reports processor to send reports
 #   [*puppet_passenger*]      - Boolean value to determine whether puppet is
 #                               to be run with Passenger
 #   [*puppet_site*]           - The VirtualHost value used in the apache vhost
@@ -58,28 +59,36 @@
 #  }
 #
 class puppet::master (
-  $modulepath = $::puppet::params::modulepath,
-  $confdir = $::puppet::params::confdir,
-  $manifest = $::puppet::params::manifest,
-  $storeconfigs = false,
-  $storeconfigs_dbadapter = $::puppet::params::storeconfigs_dbadapter,
-  $storeconfigs_dbuser = $::puppet::params::storeconfigs_dbuser,
-  $storeconfigs_dbpassword = $::puppet::params::storeconfigs_dbpassword,
-  $storeconfigs_dbserver = $::puppet::params::storeconfigs_dbserver,
-  $storeconfigs_dbsocket = $::puppet::params::storeconfigs_dbsocket,
-  $install_mysql_pkgs = $::puppet::params::puppet_storeconfigs_packages,
-  $certname = $::fqdn,
-  $autosign = false,
-  $dashboard_port = 3000,
-  $puppet_passenger = false,
-  $puppet_site = $::puppet::params::puppet_site,
-  $puppet_docroot = $::puppet::params::puppet_docroot,
-  $puppet_vardir = $::puppet::params::puppet_vardir,
-  $puppet_passenger_port = false,
-  $puppet_master_package = $::puppet::params::puppet_master_package,
-  $package_provider = undef,
-  $puppet_master_service = $::puppet::params::puppet_master_service,
-  $version = 'present'
+  $modulepath                 = $::puppet::params::modulepath,
+  $confdir                    = $::puppet::params::confdir,
+  $manifest                   = $::puppet::params::manifest,
+  $storeconfigs               = false,
+  $storeconfigs_dbadapter     = $::puppet::params::storeconfigs_dbadapter,
+  $storeconfigs_dbuser        = $::puppet::params::storeconfigs_dbuser,
+  $storeconfigs_dbpassword    = $::puppet::params::storeconfigs_dbpassword,
+  $storeconfigs_dbserver      = $::puppet::params::storeconfigs_dbserver,
+  $storeconfigs_dbport        = undef,
+  $storeconfigs_dbsocket      = $::puppet::params::storeconfigs_dbsocket,
+  $install_mysql_pkgs         = $::puppet::params::puppet_storeconfigs_packages,
+  $certname                   = $::fqdn,
+  $autosign                   = false,
+  $reports                    = ['log'],
+  $reporturl                  = undef,
+  $puppet_passenger           = false,
+  $puppet_site                = $::puppet::params::puppet_site,
+  $puppet_docroot             = $::puppet::params::puppet_docroot,
+  $puppet_vardir              = $::puppet::params::puppet_vardir,
+  $manage_vardir              = true,
+  $puppet_passenger_port      = false,
+  $puppet_master_package      = $::puppet::params::puppet_master_package,
+  $package_provider           = undef,
+  $puppet_master_service      = $::puppet::params::puppet_master_service,
+  $puppet_central_ca          = undef,
+  $puppetdb_terminus_package  = $::puppet::params::puppetdb_terminus_package,
+  $puppetdb_terminus_version  = $::puppet::params::puppetdb_terminus_version,
+  $proxy_allow_from           = [],
+  $puppet_extra_configs       = {},
+  $version                    = 'present'
 
 ) inherits puppet::params {
 
@@ -92,12 +101,24 @@ class puppet::master (
   }
 
   if $storeconfigs {
-    class { 'puppet::storeconfigs':
-      dbadapter  => $storeconfigs_dbadapter,
-      dbuser     => $storeconfigs_dbuser,
-      dbpassword => $storeconfigs_dbpassword,
-      dbserver   => $storeconfigs_dbserver,
-      dbsocket   => $storeconfigs_dbsocket,
+
+    if $storeconfigs_dbadapter == "puppetdb" {
+      class { 'puppet::storeconfigs':
+        dbadapter                 => 'puppetdb',
+        dbserver                  => $storeconfigs_dbserver,
+        dbport                    => $storeconfigs_dbport,
+        package_provider          => $package_provider,
+        puppetdb_terminus_package => $puppetdb_terminus_package,
+        puppetdb_terminus_version => $puppetdb_terminus_version
+      }
+    } else {
+      class { 'puppet::storeconfigs':
+        dbadapter  => $storeconfigs_dbadapter,
+        dbuser     => $storeconfigs_dbuser,
+        dbpassword => $storeconfigs_dbpassword,
+        dbserver   => $storeconfigs_dbserver,
+        dbsocket   => $storeconfigs_dbsocket,
+      }
     }
   }
 
@@ -143,9 +164,10 @@ class puppet::master (
     }
 
     file { "/etc/puppet/rack/config.ru":
-      ensure => present,
-      source => "puppet:///modules/puppet/config.ru",
-      mode   => '0644',
+      ensure  => link,
+      target  => '/usr/share/puppet/ext/rack/files/config.ru',
+      mode    => '0644',
+      require => [ Package[$puppet_master_package], File['/etc/puppet/rack'] ]
     }
 
     concat::fragment { 'puppet.conf-master':
@@ -196,11 +218,13 @@ class puppet::master (
     }
   }
 
-  file { $puppet_vardir:
-    ensure       => directory,
-    recurse      => true,
-    recurselimit => '1',
-    notify       => $service_notify,
+  if $manage_vardir {
+    file { $puppet_vardir:
+      ensure       => directory,
+      recurse      => true,
+      recurselimit => '1',
+      notify       => $service_notify,
+    }
   }
 
   if defined(File['/etc/puppet']) {

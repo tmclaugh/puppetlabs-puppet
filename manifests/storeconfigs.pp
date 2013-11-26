@@ -11,26 +11,40 @@
 # Sample Usage:
 #
 class puppet::storeconfigs (
-    $dbadapter,
-    $dbuser,
-    $dbpassword,
-    $dbserver,
-    $dbsocket
+  $dbadapter                 = $puppet::params::storeconfigs_dbadapter,
+  $dbuser                    = $puppet::params::storeconfigs_dbuser,
+  $dbpassword                = $puppet::params::storeconfigs_dbpassword,
+  $dbserver                  = $puppet::params::storeconfigs_dbserver,
+  $dbsocket                  = $puppet::params::storeconfigs_dbsocket,
+  $dbport                    = undef,
+  $package_provider          = undef,
+  $puppetdb_terminus_package = $puppet::params::puppetdb_terminus_package,
+  $puppetdb_terminus_version = $puppet::params::puppetdb_terminus_version,
+
 ) {
 
-  # This version of activerecord works with Ruby 1.8.5 and Centos 5.
-  # This ensure should be fixed.
-  Package['activerecord'] -> Class['puppet::storeconfigs']
+  package { $puppet::params::activerecord_package:
+    ensure    => latest,
+    provider  => $package_provider,
+  }
 
   case $dbadapter {
     'sqlite3': {
       include puppet::storeconfigs::sqlite
     }
     'mysql': {
-      class {
-        "puppet::storeconfigs::mysql":
-          dbuser     => $dbuser,
-          dbpassword => $dbpassword,
+      class { "puppet::storeconfigs::mysql":
+        dbuser      => $dbuser,
+        dbpassword  => $dbpassword,
+      }
+    }
+    'puppetdb': {
+      class { 'puppet::storeconfigs::puppetdb':
+        dbserver                  => $dbserver,
+        dbport                    => $dbport,
+        package_provider          => $package_provider,
+        puppetdb_terminus_package => $puppetdb_terminus_package,
+        puppetdb_terminus_version => $puppetdb_terminus_version
       }
     }
     default: { err("target dbadapter $dbadapter not implemented") }
