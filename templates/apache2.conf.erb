@@ -1,7 +1,4 @@
 LoadModule ssl_module modules/mod_ssl.so
-<% if @puppet_central_ca -%>
-LoadModule proxy_http_module modules/mod_proxy_http.so
-<% end -%>
 Listen <%= @puppet_passenger_port %>
 
 <VirtualHost *:<%= @puppet_passenger_port %>>

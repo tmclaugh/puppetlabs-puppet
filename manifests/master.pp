@@ -148,6 +148,11 @@ class puppet::master (
       class { '::passenger': }
     }
 
+    if $puppet_central_ca {
+      class { '::apache::mod::proxy': }
+      class { '::apache::mod::proxy_http': }
+    }
+
     apache::vhost { "puppet-$puppet_site":
       port            => $puppet_passenger_port,
       priority        => '40',
