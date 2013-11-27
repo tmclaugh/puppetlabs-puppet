@@ -148,6 +148,8 @@ class puppet::master (
       class { '::passenger': }
     }
 
+    class { '::apache::mod::headers': }
+
     if $puppet_central_ca {
       class { '::apache::mod::proxy': }
       class { '::apache::mod::proxy_http': }
