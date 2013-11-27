@@ -157,10 +157,16 @@ class puppet::master (
       port            => $puppet_passenger_port,
       priority        => '40',
       docroot         => $puppet_docroot,
+      ssl             => true,
+      ssl_cert        => "${puppet::params::puppet_ssldir}/certs/${certname}.pem",
+      ssl_key         => "${puppet::params::puppet_ssldir}/private_keys/${certname}.pem",
+      ssl_chain       => "${puppet::params::puppet_ssldir}/ca_crt.pem",
+      ssl_ca          => "${puppet::params::puppet_ssldir}/ca_crt.pem",
+      ssl_crl         => "${puppet::params::puppet_ssldir}/ca_crl.pem",
+      sslproxyengine  => true,
     # template        => 'puppet/apache2.conf.erb',
       custom_fragment => template('puppet/apache2.conf.erb'),
       require         => [ File['/etc/puppet/rack/config.ru'], File['/etc/puppet/puppet.conf'] ],
-      ssl             => true,
     }
 
     file { ["/etc/puppet/rack", "/etc/puppet/rack/public"]:
