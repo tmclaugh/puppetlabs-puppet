@@ -158,6 +158,7 @@ class puppet::master (
     apache::vhost { "puppet-$puppet_site":
       port            => $puppet_passenger_port,
       priority        => '40',
+      servername      => $puppet_site,
       docroot         => $puppet_docroot,
       ssl             => true,
       ssl_cert        => "${puppet::params::puppet_ssldir}/certs/${certname}.pem",
