@@ -148,18 +148,22 @@ class puppet::master (
       class { '::passenger': }
     }
 
-    class { '::apache::mod::headers': }
-
     if $puppet_central_ca {
       class { '::apache::mod::proxy': }
       class { '::apache::mod::proxy_http': }
     }
+
+    $request_headers = ['unset X-Forwarded-For',
+                        'set X-SSL-Subject %{SSL_CLIENT_S_DN}e',
+                        'set X-Client-DN %{SSL_CLIENT_S_DN}e',
+                        'set X-Client-Verify %{SSL_CLIENT_VERIFY}e']
 
     apache::vhost { "puppet-$puppet_site":
       port            => $puppet_passenger_port,
       priority        => '40',
       servername      => $puppet_site,
       docroot         => $puppet_docroot,
+      request_headers => ['', '', '', ''],
       ssl             => true,
       ssl_cert        => "${puppet::params::puppet_ssldir}/certs/${certname}.pem",
       ssl_certs_dir   => "${puppet::params::puppet_ssldir}/certs",
