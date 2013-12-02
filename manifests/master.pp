@@ -148,13 +148,33 @@ class puppet::master (
       class { '::passenger': }
     }
 
+    if $puppet_central_ca {
+      class { '::apache::mod::proxy': }
+      class { '::apache::mod::proxy_http': }
+    }
+
+    $request_headers = ['unset X-Forwarded-For',
+                        'set X-SSL-Subject %{SSL_CLIENT_S_DN}e',
+                        'set X-Client-DN %{SSL_CLIENT_S_DN}e',
+                        'set X-Client-Verify %{SSL_CLIENT_VERIFY}e']
+
     apache::vhost { "puppet-$puppet_site":
-      port     => $puppet_passenger_port,
-      priority => '40',
-      docroot  => $puppet_docroot,
-      template => 'puppet/apache2.conf.erb',
-      require  => [ File['/etc/puppet/rack/config.ru'], File['/etc/puppet/puppet.conf'] ],
-      ssl      => true,
+      port            => $puppet_passenger_port,
+      priority        => '40',
+      servername      => $puppet_site,
+      docroot         => $puppet_docroot,
+      request_headers => ['', '', '', ''],
+      ssl             => true,
+      ssl_cert        => "${puppet::params::puppet_ssldir}/certs/${certname}.pem",
+      ssl_certs_dir   => "${puppet::params::puppet_ssldir}/certs",
+      ssl_key         => "${puppet::params::puppet_ssldir}/private_keys/${certname}.pem",
+      ssl_chain       => "${puppet::params::puppet_ssldir}/ca/ca_crt.pem",
+      ssl_ca          => "${puppet::params::puppet_ssldir}/ca/ca_crt.pem",
+      ssl_crl         => "${puppet::params::puppet_ssldir}/ca/ca_crl.pem",
+      sslproxyengine  => true,
+    # template        => 'puppet/apache2.conf.erb',
+      custom_fragment => template('puppet/apache2.conf.erb'),
+      require         => [ File['/etc/puppet/rack/config.ru'], File['/etc/puppet/puppet.conf'] ],
     }
 
     file { ["/etc/puppet/rack", "/etc/puppet/rack/public"]:

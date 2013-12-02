@@ -32,7 +32,7 @@ class puppet::params {
   $puppetdb_terminus_version        = 'installed'
 
   case $::operatingsystem {
-    'centos', 'redhat', 'fedora': {
+    'centos', 'redhat', 'fedora', 'scientific': {
       $puppet_master_package        = 'puppet'
       $puppet_master_service        = 'puppetmaster'
       $puppet_agent_service         = 'puppet'
