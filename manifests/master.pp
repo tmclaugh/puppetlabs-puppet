@@ -183,9 +183,11 @@ class puppet::master (
     }
 
     file { "/etc/puppet/rack/config.ru":
-      ensure  => link,
-      target  => '/usr/share/puppet/ext/rack/files/config.ru',
+      ensure  => present,
+      owner   => 'puppet',
+      group   => 'puppet',
       mode    => '0644',
+      source  => ['/usr/share/puppet/ext/rack/files/config.ru', '/usr/share/puppet/ext/rack/config.ru'],
       require => [ Package[$puppet_master_package], File['/etc/puppet/rack'] ]
     }
 
