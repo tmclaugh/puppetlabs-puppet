@@ -49,8 +49,8 @@ class puppet::agent(
       subscribe => Package[$puppet_agent_name],
     }
   } else {
+      $service_notify = Service[$puppet_agent_service]
     if $puppet_agent_cron == true {
-      $service_notify = undef
 
       $first  = fqdn_rand(30)
       $second = $first + 30
@@ -67,7 +67,6 @@ class puppet::agent(
       }
 
     } else {
-      $service_notify = Service[$puppet_agent_service]
 
       service { $puppet_agent_service:
         ensure    => running,
