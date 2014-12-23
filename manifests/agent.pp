@@ -56,6 +56,7 @@ class puppet::agent(
       $second = $first + 30
 
       cron { 'puppet-agent':
+        ensure  => 'present',
         command => '/usr/bin/puppet agent -t &> /dev/null',
         user    => 'root',
         minute  => [$first, $second]
@@ -68,7 +69,6 @@ class puppet::agent(
       }
 
     } else {
-
       service { $puppet_agent_service:
         ensure    => running,
         enable    => true,
@@ -77,6 +77,12 @@ class puppet::agent(
         subscribe => Package[$puppet_agent_name],
         #before    => Service['httpd'];
       }
+
+      cron { 'puppet-agent':
+        ensure  => 'absent',
+        require => Service[$puppet_agent_service]
+      }
+
     }
   }
 
