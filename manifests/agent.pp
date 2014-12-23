@@ -64,6 +64,7 @@ class puppet::agent(
       service { $puppet_agent_service:
         ensure  => stopped,
         enable  => false,
+        require => Cron['puppet-agent']
       }
 
     } else {
