@@ -97,6 +97,9 @@ class puppet::master (
     group   => 'puppet',
   }
 
+  $master_puppet_extra_configs = delete_undef_values($puppet_extra_configs[master])
+  $real_puppet_extra_configs = { master => $master_puppet_extra_configs }
+
   if $storeconfigs {
 
     if $storeconfigs_dbadapter == "puppetdb" {
