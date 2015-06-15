@@ -13,6 +13,7 @@
 class puppet::agent(
   $puppet_server,
   $puppet_defaults = $::puppet::params::puppet_defaults,
+  $puppet_agent_enabled = true,
   $puppet_agent_cron = $::puppet::params::puppet_agent_cron,
   $puppet_agent_service = $::puppet::params::puppet_agent_service,
   $puppet_agent_name = $::puppet::params::puppet_agent_name,
@@ -38,51 +39,63 @@ class puppet::agent(
     }
   }
 
-  if $package_provider == 'gem' {
-    $service_notify = Exec['puppet_agent_start']
+  if $puppet_agent_enabled {
+    if $package_provider == 'gem' {
+      $service_notify = Exec['puppet_agent_start']
 
-    exec { 'puppet_agent_start':
-      command   => '/usr/bin/nohup puppet agent &',
-      refresh   => '/usr/bin/pkill puppet && /usr/bin/nohup puppet agent &',
-      unless    => "/bin/ps -ef | grep -v grep | /bin/grep 'puppet agent'",
-      require   => File['/etc/puppet/puppet.conf'],
-      subscribe => Package[$puppet_agent_name],
-    }
-  } else {
-      $service_notify = Service[$puppet_agent_service]
-    if $puppet_agent_cron == true {
-
-      $first  = fqdn_rand(30)
-      $second = $first + 30
-
-      cron { 'puppet-agent':
-        ensure  => 'present',
-        command => '/usr/bin/puppet agent -t &> /dev/null',
-        user    => 'root',
-        minute  => [$first, $second]
-      }
-
-      service { $puppet_agent_service:
-        ensure  => stopped,
-        enable  => false,
-        require => Cron['puppet-agent']
-      }
-
-    } else {
-      service { $puppet_agent_service:
-        ensure    => running,
-        enable    => true,
-        hasstatus => true,
+      exec { 'puppet_agent_start':
+        command   => '/usr/bin/nohup puppet agent &',
+        refresh   => '/usr/bin/pkill puppet && /usr/bin/nohup puppet agent &',
+        unless    => "/bin/ps -ef | grep -v grep | /bin/grep 'puppet agent'",
         require   => File['/etc/puppet/puppet.conf'],
         subscribe => Package[$puppet_agent_name],
-        #before    => Service['httpd'];
       }
+    } else {
+      $service_notify = Service[$puppet_agent_service]
+      if $puppet_agent_cron == true {
 
-      cron { 'puppet-agent':
-        ensure  => 'absent',
-        require => Service[$puppet_agent_service]
+        $first  = fqdn_rand(30)
+        $second = $first + 30
+
+        cron { 'puppet-agent':
+          ensure  => 'present',
+          command => '/usr/bin/puppet agent -t &> /dev/null',
+          user    => 'root',
+          minute  => [$first, $second]
+        }
+
+        service { $puppet_agent_service:
+          ensure  => stopped,
+          enable  => false,
+          require => Cron['puppet-agent']
+        }
+
+      } else {
+
+        service { $puppet_agent_service:
+          ensure    => running,
+          enable    => true,
+          hasstatus => true,
+          require   => File['/etc/puppet/puppet.conf'],
+          subscribe => Package[$puppet_agent_name],
+          #before    => Service['httpd'];
+        }
+
+        cron { 'puppet-agent':
+          ensure  => 'absent',
+          require => Service[$puppet_agent_service]
+        }
+
       }
+    }
+  } else {
+    service { $puppet_agent_service:
+      ensure  => stopped,
+      enable  => false,
+    }
 
+    cron { 'puppet-agent':
+      ensure  => 'absent',
     }
   }
 
