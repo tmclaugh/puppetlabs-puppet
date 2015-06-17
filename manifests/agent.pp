@@ -39,7 +39,7 @@ class puppet::agent(
     }
   }
 
-  if $puppet_agent_enabled {
+  if $puppet_agent_enabled == true {
     if $package_provider == 'gem' {
       $service_notify = Exec['puppet_agent_start']
 
