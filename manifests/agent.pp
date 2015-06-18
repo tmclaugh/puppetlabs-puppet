@@ -89,6 +89,8 @@ class puppet::agent(
       }
     }
   } else {
+    $service_notify = Service[$puppet_agent_service]
+
     service { $puppet_agent_service:
       ensure  => stopped,
       enable  => false,
