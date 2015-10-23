@@ -25,5 +25,8 @@
   ProxyVia On
 
   ProxyPassMatch ^/([^/]+/certificate.*)$ <%= @puppet_central_ca %>/$1
+  <Location ~ "/[^/]+/certificate">
+   PassengerHighPerformance Off
+  </Location>
 <% end -%>
 
