@@ -262,5 +262,10 @@ class puppet::master (
     }
   }
 
+  file { '/etc/puppet/auth.conf':
+    content => template('puppet/auth.conf.erb'),
+    notify  => $service_notify
+  }
+
 }
 
