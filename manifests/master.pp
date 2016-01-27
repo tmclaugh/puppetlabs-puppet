@@ -33,7 +33,7 @@
 #   [*package_provider*]        - The provider used for package installation
 #   [*version*]               - The value of the ensure parameter for the
 #                               puppet master and agent packages
-#   [*auth_conf_template*]    - Path to ERB template to use for auth.conf.
+#   [*auth_conf_content*]     - auth.conf content
 #
 # Actions:
 #
@@ -87,7 +87,7 @@ class puppet::master (
   $puppetdb_terminus_package  = $::puppet::params::puppetdb_terminus_package,
   $puppetdb_terminus_version  = $::puppet::params::puppetdb_terminus_version,
   $proxy_allow_from           = [],
-  $auth_conf_template         = 'puppet/auth.conf.erb',
+  $auth_conf_content          = template('puppet/auth.conf'),
   $ssl_cert                   = "${puppet::params::puppet_ssldir}/certs/${::fqdn}.pem",
   $ssl_certs_dir              = "${puppet::params::puppet_ssldir}/certs",
   $ssl_key                    = "${puppet::params::puppet_ssldir}/private_keys/${::fqdn}.pem",
@@ -265,9 +265,9 @@ class puppet::master (
   }
 
   file { '/etc/puppet/auth.conf':
-    content => template($auth_conf_template),
+    content => $auth_conf_content,
     notify  => $service_notify
   }
-
+  
 }
 
