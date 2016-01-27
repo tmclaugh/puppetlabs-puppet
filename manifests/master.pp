@@ -269,7 +269,5 @@ class puppet::master (
     notify  => $service_notify
   }
   
-  if $auth_conf_content == un
-
 }
 
