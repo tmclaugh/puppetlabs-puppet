@@ -87,7 +87,7 @@ class puppet::master (
   $puppetdb_terminus_package  = $::puppet::params::puppetdb_terminus_package,
   $puppetdb_terminus_version  = $::puppet::params::puppetdb_terminus_version,
   $proxy_allow_from           = [],
-  $auth_conf_content          = template('puppet/auth.conf'),
+  $auth_conf_content          = template('puppet/auth.conf.erb'),
   $ssl_cert                   = "${puppet::params::puppet_ssldir}/certs/${::fqdn}.pem",
   $ssl_certs_dir              = "${puppet::params::puppet_ssldir}/certs",
   $ssl_key                    = "${puppet::params::puppet_ssldir}/private_keys/${::fqdn}.pem",
